@@ -13,7 +13,6 @@ func follower_behavior(server *server) {
 	log.Println(server.election_timeout)
 
 	for {
-		log.Print("follower loop")
 		select {
 		// wait for clock time
 		case <-time.After(server.election_timeout):
@@ -40,12 +39,21 @@ func candidate_behavior(server *server) {
 	defer cancel()
 
 	for i := 0; i < server.client_cnt; i++ {
-		reply, err := server.clients[i].RequestVote(ctx, &pb.VoteRequest{Port: int32(server.id)})
-		if err != nil {
-			log.Fatalf("could not greet: %v", err)
-		}
-		if reply.Granted {
-			total_vote++
+		select {
+		case <-server.heartbeat_channel:
+			server.mu.Lock()
+			server.status = "follower"
+			server.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
+			server.mu.Unlock()
+			return
+		default:
+			reply, err := server.clients[i].RequestVote(ctx, &pb.VoteRequest{Port: int32(server.id)})
+			if err != nil {
+				log.Fatalf("could not greet: %v", err)
+			}
+			if reply.Granted {
+				total_vote++
+			}
 		}
 	}
 
@@ -53,6 +61,7 @@ func candidate_behavior(server *server) {
 		server.mu.Lock()
 		log.Println("candidate -> leader")
 		server.status = "leader"
+		server.is_voted = false
 		server.mu.Unlock()
 	} else {
 		server.mu.Lock()
