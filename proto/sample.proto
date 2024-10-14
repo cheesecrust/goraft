@@ -22,6 +22,7 @@ message HelloReply {
 
 message VoteRequest {
   int32 port = 1;
+  int32 term = 2;
 }
 
 message VoteReply {
@@ -29,6 +30,7 @@ message VoteReply {
 }
 
 message HeartBeatRequest {
+  int32 term = 1;
 }
 
 message HeartBeatReply {

@@ -21,6 +21,7 @@ type server struct {
 	status                        string
 	is_voted                      bool
 	election_timeout              time.Duration
+	term                          int
 
 	conns             [5]*grpc.ClientConn
 	clients           [5]pb.GreeterClient

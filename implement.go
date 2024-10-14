@@ -14,7 +14,13 @@ func (server *server) SayHello(ctx context.Context, in *pb.HelloRequest) (*pb.He
 
 func (server *server) RequestVote(ctx context.Context, in *pb.VoteRequest) (*pb.VoteReply, error) {
 	log.Printf("Received: %v", in.Port)
-	return &pb.VoteReply{Granted: !server.is_voted}, nil
+	if server.term > int(in.Term) || server.is_voted {
+		return &pb.VoteReply{Granted: false}, nil
+	}
+	server.mu.Lock()
+	server.is_voted = true
+	server.mu.Unlock()
+	return &pb.VoteReply{Granted: true}, nil
 }
 
 func (server *server) HeartBeat(ctx context.Context, in *pb.HeartBeatRequest) (*pb.HeartBeatReply, error) {
