@@ -14,11 +14,17 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	Follower = iota
+	Candidate
+	Leader
+)
+
 type server struct {
 	pb.UnimplementedGreeterServer //이 부분은 안하면 에러가 발생한다. protobuf generate시 생성됨
 	id                            int
 	client_cnt                    int
-	status                        string
+	status                        int
 	is_voted                      bool
 	election_timeout              time.Duration
 	term                          int
@@ -47,7 +53,7 @@ func main() {
 	}
 	server.id = port_int
 	server.client_cnt = len(client_ports)
-	server.status = "follower"
+	server.status = Follower
 	server.is_voted = false
 	server.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
 	server.heartbeat_channel = make(chan bool)
@@ -69,11 +75,11 @@ func main() {
 
 	for {
 		switch server.status {
-		case "follower":
+		case Follower:
 			follower_behavior(server)
-		case "candidate":
+		case Candidate:
 			candidate_behavior(server)
-		case "leader":
+		case Leader:
 			leader_behavior(server)
 		}
 	}

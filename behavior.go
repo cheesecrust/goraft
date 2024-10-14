@@ -9,7 +9,7 @@ import (
 )
 
 func follower_behavior(server *server) {
-	log.Print("follower")
+	log.Print(Follower)
 	log.Println(server.election_timeout)
 
 	for {
@@ -17,7 +17,7 @@ func follower_behavior(server *server) {
 		// wait for clock time
 		case <-time.After(server.election_timeout):
 			server.mu.Lock()
-			server.status = "candidate"
+			server.status = Candidate
 			server.is_voted = true
 			server.mu.Unlock()
 			return
@@ -32,7 +32,7 @@ func follower_behavior(server *server) {
 }
 
 func candidate_behavior(server *server) {
-	log.Println("candidate")
+	log.Println(Candidate)
 
 	total_vote := 1
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -42,7 +42,7 @@ func candidate_behavior(server *server) {
 		select {
 		case <-server.heartbeat_channel:
 			server.mu.Lock()
-			server.status = "follower"
+			server.status = Follower
 			server.is_voted = false
 			server.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
 			server.mu.Unlock()
@@ -62,12 +62,12 @@ func candidate_behavior(server *server) {
 	log.Printf("total_vote: %v\n", total_vote)
 	if total_vote > (server.client_cnt+1)/2 {
 		server.mu.Lock()
-		server.status = "leader"
+		server.status = Leader
 		log.Println("candidate -> leader")
 		server.mu.Unlock()
 	} else {
 		server.mu.Lock()
-		server.status = "follower"
+		server.status = Follower
 		server.is_voted = false
 		log.Println("candidate -> follower")
 		server.mu.Unlock()
