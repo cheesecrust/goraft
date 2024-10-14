@@ -1,0 +1,36 @@
+syntax = "proto3";
+package sample;
+option go_package = "proto/";
+
+service Greeter {
+  rpc SayHello (HelloRequest) returns (HelloReply) {}
+  rpc RequestVote (VoteRequest) returns (VoteReply) {}
+  rpc HeartBeat (HeartBeatRequest) returns (HeartBeatReply) {}
+}
+
+// The request message containing the user's name.
+message HelloRequest {
+  int32 num1 = 1;
+  int32 num2 = 2;
+}
+
+// The response message containing the greetings
+message HelloReply {
+  int32 res1 = 1;
+  int32 res2 = 2;
+}
+
+message VoteRequest {
+  int32 port = 1;
+}
+
+message VoteReply {
+  bool granted = 1;
+}
+
+message HeartBeatRequest {
+}
+
+message HeartBeatReply {
+  bool res = 1;
+}
