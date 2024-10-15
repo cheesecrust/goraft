@@ -12,6 +12,8 @@ import (
 	"google.golang.org/grpc/credentials/insecure"
 )
 
+const MAX_CONNECT = 100
+
 const (
 	Follower = iota
 	Candidate
@@ -27,8 +29,8 @@ type node struct {
 	election_timeout              time.Duration
 	term                          int
 
-	conns             [5]*grpc.ClientConn
-	clients           [5]pb.GreeterClient
+	conns             [MAX_CONNECT]*grpc.ClientConn
+	clients           [MAX_CONNECT]pb.GreeterClient
 	heartbeat_channel chan bool
 	mu                sync.Mutex
 }
