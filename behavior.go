@@ -9,7 +9,7 @@ import (
 )
 
 func follower_behavior(node *node) {
-	log.Print(Follower)
+	log.Print("Follower")
 	log.Println(node.election_timeout)
 
 	for {
@@ -32,7 +32,7 @@ func follower_behavior(node *node) {
 }
 
 func candidate_behavior(node *node) {
-	log.Println(Candidate)
+	log.Println("Candidate")
 
 	total_vote := 1
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -41,11 +41,7 @@ func candidate_behavior(node *node) {
 	for i := 0; i < node.client_cnt; i++ {
 		select {
 		case <-node.heartbeat_channel:
-			node.mu.Lock()
-			node.status = Follower
-			node.is_voted = false
-			node.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
-			node.mu.Unlock()
+			change_status(node, Follower)
 			return
 		default:
 			log.Println(i)
@@ -66,17 +62,13 @@ func candidate_behavior(node *node) {
 		log.Println("candidate -> leader")
 		node.mu.Unlock()
 	} else {
-		node.mu.Lock()
-		node.status = Follower
-		node.is_voted = false
-		node.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
+		change_status(node, Follower)
 		log.Println("candidate -> follower")
-		node.mu.Unlock()
 	}
 }
 
 func leader_behavior(node *node) {
-	log.Println("leader")
+	log.Println("Leader")
 	node.term++
 	for {
 		for i := 0; i < node.client_cnt; i++ {

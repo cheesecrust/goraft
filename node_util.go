@@ -22,19 +22,20 @@ func init_node(node *node, port *string, client_ports []string) {
 }
 
 func change_status(node *node, status int) {
-	node.mu.Lock()
+	println("status changed to ", status)
 	node.status = status
 	if status == Follower {
+		node.mu.Lock()
 		node.is_voted = false
+		node.mu.Unlock()
 		reset_timeout(node)
 	} else if status == Candidate {
+		node.mu.Lock()
 		node.is_voted = true
+		node.mu.Unlock()
 	}
-	node.mu.Unlock()
 }
 
 func reset_timeout(node *node) {
-	node.mu.Lock()
 	node.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
-	node.mu.Unlock()
 }
