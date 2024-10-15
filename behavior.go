@@ -16,10 +16,7 @@ func follower_behavior(node *node) {
 		select {
 		// wait for clock time
 		case <-time.After(node.election_timeout):
-			node.mu.Lock()
-			node.status = Candidate
-			node.is_voted = true
-			node.mu.Unlock()
+			change_status(node, Candidate)
 			return
 		case receive := <-node.heartbeat_channel:
 			log.Printf("receive heartbeat: %v\n", receive)
@@ -57,10 +54,8 @@ func candidate_behavior(node *node) {
 	}
 	log.Printf("total_vote: %v\n", total_vote)
 	if total_vote > (node.client_cnt+1)/2 {
-		node.mu.Lock()
-		node.status = Leader
+		change_status(node, Leader)
 		log.Println("candidate -> leader")
-		node.mu.Unlock()
 	} else {
 		change_status(node, Follower)
 		log.Println("candidate -> follower")
@@ -73,9 +68,8 @@ func leader_behavior(node *node) {
 	for {
 		for i := 0; i < node.client_cnt; i++ {
 			log.Printf("send heartbeat %v\n", i)
-			ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+			ctx, _ := context.WithTimeout(context.Background(), time.Second)
 			node.clients[i].HeartBeat(ctx, &pb.HeartBeatRequest{Term: int32(node.term)})
-			defer cancel()
 		}
 	}
 }

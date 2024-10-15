@@ -15,10 +15,8 @@ func init_node(node *node, port *string, client_ports []string) {
 	}
 	node.id = port_int
 	node.client_cnt = len(client_ports)
-	node.status = Follower
-	node.is_voted = false
 	node.heartbeat_channel = make(chan bool)
-	reset_timeout(node)
+	change_status(node, Follower)
 }
 
 func change_status(node *node, status int) {
