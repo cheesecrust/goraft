@@ -69,6 +69,7 @@ func candidate_behavior(node *node) {
 		node.mu.Lock()
 		node.status = Follower
 		node.is_voted = false
+		node.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
 		log.Println("candidate -> follower")
 		node.mu.Unlock()
 	}
