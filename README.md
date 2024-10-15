@@ -13,6 +13,8 @@ $ export PATH="$PATH:$(go env GOPATH)/bin"
 
 ## Quit Start
 
+현재는 실행 파일이 올라가 있기 때문에 go 와 grpc 가 있다면 **Strart Node** 명령어 만으로 실행 시킬 수 있습니다.
+
 1. Clone the repo
 
 ```bash
@@ -31,3 +33,5 @@ $ go build .
 ```bash
 $ ./exmaple [-port <host_port>] [-client <client_port1>,<client_port2>...]
 ```
+
+
