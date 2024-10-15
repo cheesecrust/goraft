@@ -4,7 +4,6 @@ import (
 	"context"
 	pb "example/proto"
 	"log"
-	"math/rand"
 	"time"
 )
 
@@ -20,9 +19,7 @@ func follower_behavior(node *node) {
 			return
 		case receive := <-node.heartbeat_channel:
 			log.Printf("receive heartbeat: %v\n", receive)
-			node.mu.Lock()
-			node.election_timeout = time.Duration(150+rand.Intn(150)) * time.Millisecond
-			node.mu.Unlock()
+			reset_timeout(node)
 			continue
 		}
 	}

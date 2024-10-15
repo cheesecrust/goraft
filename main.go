@@ -3,13 +3,11 @@ package main
 import (
 	pb "example/proto"
 	"flag"
-	"fmt"
 	"strings"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials/insecure"
 )
 
 const MAX_CONNECT = 100
@@ -47,12 +45,11 @@ func main() {
 
 	// initialize node
 	init_node(node, port, client_ports)
-
-	for index, client_port := range client_ports {
-		node.conns[index], _ = grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", client_port), grpc.WithTransportCredentials(insecure.NewCredentials()))
-		node.clients[index] = pb.NewGreeterClient(node.conns[index]) //서버의 method를 사용할 수 있게 해줌
-		defer node.conns[index].Close()
-	}
+	defer func() {
+		for _, conn := range node.conns {
+			conn.Close()
+		}
+	}()
 
 	for {
 		switch node.status {
