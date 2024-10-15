@@ -4,13 +4,12 @@ import (
 	pb "example/proto"
 	"flag"
 	"fmt"
-	"log"
-	"math/rand"
 	"strings"
 	"sync"
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
 )
 
 const (
@@ -39,28 +38,18 @@ func main() {
 	port := flag.String("port", "12345", "The server port")
 	clients := flag.String("client", "12346", "The client port")
 	flag.Parse()
-	rand.Seed(time.Now().UnixNano())
 
 	go run_server(port, node)
 
 	client_ports := strings.Split(*clients, ",")
-	var err error
 
 	// initialize node
 	init_node(node, port, client_ports)
 
-	// 모두 연결될 때까지 연결 시도
 	for index, client_port := range client_ports {
-		log.Print(index)
-		node.conns[index], err = grpc.Dial(fmt.Sprintf("127.0.0.1:%s", client_port), grpc.WithInsecure(), grpc.WithBlock())
+		node.conns[index], _ = grpc.NewClient(fmt.Sprintf("127.0.0.1:%s", client_port), grpc.WithTransportCredentials(insecure.NewCredentials()))
 		node.clients[index] = pb.NewGreeterClient(node.conns[index]) //서버의 method를 사용할 수 있게 해줌
 		defer node.conns[index].Close()
-	}
-
-	log.Print("Connected to all nodes")
-
-	if err != nil {
-		log.Fatalf("did not connect: %v", err)
 	}
 
 	for {
